@@ -20,6 +20,13 @@ import AmplifyPlugins
 import AWSMobileClient
 import amplify_core
 
+public struct PassThroughPrefixResolver: AWSS3PluginPrefixResolver {
+    public func resolvePrefix(for accessLevel: StorageAccessLevel,
+                              targetIdentityId: String?) -> Result<String, StorageError> {
+        return .success("")
+    }
+}
+
 public class SwiftStorageS3: NSObject, FlutterPlugin {
     
     private static var transferProgressStreamHandler : TransferProgressStreamHandler = TransferProgressStreamHandler()
@@ -37,7 +44,8 @@ public class SwiftStorageS3: NSObject, FlutterPlugin {
 
     if(call.method == "addPlugin"){
         do {
-            try Amplify.add(plugin: AWSS3StoragePlugin() )
+            try Amplify.add(plugin: AWSS3StoragePlugin(
+                    configuration:.prefixResolver(PassThroughPrefixResolver())))
             result(true)
         } catch let error{
             if(error is StorageError){
