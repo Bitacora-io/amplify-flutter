@@ -13,7 +13,10 @@ dependencies:
   amplify_storage_plugin_interface: 0.5.0
   plugin_platform_interface: ^2.0.0
   amplify_storage_s3_android: 0.5.0
-  amplify_storage_s3_ios: 0.5.0
+  amplify_storage_s3_ios:
+    git:
+      url: git@github.com:Bitacora-io/amplify-flutter.git
+      path: packages/storage/amplify_storage_s3_ios
   amplify_core: 0.5.0
 
 dev_dependencies:
