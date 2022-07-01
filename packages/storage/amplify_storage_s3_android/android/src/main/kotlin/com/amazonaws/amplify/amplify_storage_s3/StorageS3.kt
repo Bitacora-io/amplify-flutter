@@ -23,7 +23,12 @@ import com.amazonaws.amplify.amplify_core.AtomicResult
 import com.amazonaws.amplify.amplify_core.exception.ExceptionUtil.Companion.handleAddPluginException
 import com.amazonaws.amplify.amplify_storage_s3.types.TransferProgressStreamHandler
 import com.amplifyframework.core.Amplify
+import com.amplifyframework.core.Consumer
+import com.amplifyframework.storage.StorageAccessLevel
+import com.amplifyframework.storage.StorageException
 import com.amplifyframework.storage.s3.AWSS3StoragePlugin
+import com.amplifyframework.storage.s3.configuration.AWSS3PluginPrefixResolver
+import com.amplifyframework.storage.s3.configuration.AWSS3StoragePluginConfiguration
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -61,8 +66,10 @@ class StorageS3 : FlutterPlugin, ActivityAware, MethodCallHandler {
 
         if (call.method == "addPlugin") {
             try {
-                Amplify.addPlugin(AWSS3StoragePlugin())
-                Log.i("AmplifyFlutter", "Added StorageS3 plugin")
+                Amplify.addPlugin(AWSS3StoragePlugin(AWSS3StoragePluginConfiguration {
+                    awsS3PluginPrefixResolver = PassThroughPrefixResolver()
+                }))
+                Log.i("AmplifyFlutter", "Added StorageS3 plugin with passthrough prefix resolver")
                 result.success(null)
             } catch (e: Exception) {
                 handleAddPluginException("Storage", e, result)
@@ -111,5 +118,17 @@ class StorageS3 : FlutterPlugin, ActivityAware, MethodCallHandler {
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
+    }
+}
+
+class PassThroughPrefixResolver : AWSS3PluginPrefixResolver {
+
+    override fun resolvePrefix(
+            accessLevel: StorageAccessLevel,
+            targetIdentity: String?,
+            onSuccess: Consumer<String>,
+            onError: Consumer<StorageException>
+    ) {
+        onSuccess.accept("")
     }
 }
